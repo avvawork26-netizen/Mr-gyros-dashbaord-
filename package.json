@@ -1,0 +1,14 @@
+{
+  "name": "ava-real-estate-assistant",
+  "version": "1.0.0",
+  "description": "Ava — AI Real Estate Assistant for Ayoub (Orlando & Florida Coast)",
+  "scripts": {
+    "install:all": "npm install && cd backend && npm install && cd ../frontend && npm install",
+    "dev": "concurrently \"cd backend && npm run dev\" \"cd frontend && npm run dev\"",
+    "seed": "cd backend && node database/seed.js",
+    "start": "concurrently \"cd backend && npm start\" \"cd frontend && npm run preview\""
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}
