@@ -1,1 +1,576 @@
-
+Bash
+cat /home/user/Mr-gyros-dashbaord-/humanizer.html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+Show less
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Text Humanizer</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:       #0d0d0f;
+    --surface:  #13131a;
+    --surface2: #1a1a24;
+    --border:   #2a2a3a;
+    --accent:   #7c6aff;
+    --accent2:  #a98fff;
+    --green:    #5ecf7a;
+    --yellow:   #f5c842;
+    --text:     #e8e8f0;
+    --muted:    #6b6b80;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    min-height: 100vh;
+  }
+  header {
+    background: linear-gradient(135deg, #0f0f1a 0%, #0a0a12 100%);
+    border-bottom: 2px solid var(--accent);
+    padding: 0 28px;
+    height: 68px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 4px 32px rgba(124,106,255,0.15);
+  }
+  .logo-wrap { display: flex; align-items: center; gap: 12px; }
+  .logo-icon  { font-size: 1.7rem; }
+  .logo       { font-family: 'Playfair Display', serif; font-size: 1.5rem; font-weight: 900; color: var(--text); }
+  .logo em    { font-style: italic; color: var(--accent2); }
+  .logo-sub   { font-family: 'DM Mono', monospace; font-size: 0.55rem; text-transform: uppercase; letter-spacing: 0.2em; color: var(--muted); margin-top: 2px; }
+  .shimmer-bar {
+    height: 3px;
+    background: linear-gradient(90deg, var(--accent), var(--accent2), #c084fc, var(--accent2), var(--accent));
+    background-size: 200% 100%;
+    animation: shimmer 3s linear infinite;
+  }
+  @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+  .main { max-width: 1100px; margin: 0 auto; padding: 32px 24px; }
+  .hero {
+    text-align: center;
+    margin-bottom: 36px;
+  }
+  .hero h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: 2.2rem;
+    font-weight: 900;
+    margin-bottom: 8px;
+    background: linear-gradient(135deg, var(--text), var(--accent2));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .hero p {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    color: var(--muted);
+  }
+  .controls {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 12px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+  .strength-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.65rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--muted);
+    margin-right: 4px;
+  }
+  .strength-btn {
+    padding: 6px 14px;
+    border-radius: 20px;
+    border: 1px solid var(--border);
+    background: var(--surface2);
+    color: var(--muted);
+    font-family: 'DM Mono', monospace;
+    font-size: 0.65rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .strength-btn:hover { border-color: var(--accent); color: var(--accent2); }
+  .strength-btn.active { background: rgba(124,106,255,0.15); border-color: var(--accent); color: var(--accent2); }
+  .editor-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    margin-bottom: 20px;
+  }
+  @media (max-width: 700px) {
+    .editor-grid { grid-template-columns: 1fr; }
+  }
+  .pane {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+  .pane-header {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-bottom: none;
+    border-radius: 12px 12px 0 0;
+    padding: 10px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .pane-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.62rem;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    color: var(--muted);
+  }
+  .pane-label span {
+    display: inline-block;
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    margin-right: 7px;
+    vertical-align: middle;
+    position: relative;
+    top: -1px;
+  }
+  .dot-in  { background: var(--yellow); }
+  .dot-out { background: var(--green); }
+  .word-count {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.6rem;
+    color: var(--muted);
+  }
+  textarea {
+    width: 100%;
+    min-height: 320px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 0 0 12px 12px;
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.92rem;
+    line-height: 1.7;
+    padding: 18px;
+    resize: vertical;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  textarea:focus { border-color: var(--accent); }
+  textarea::placeholder { color: var(--muted); opacity: 0.6; }
+  #output {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 0 0 12px 12px;
+    min-height: 320px;
+    padding: 18px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.92rem;
+    line-height: 1.7;
+    color: var(--text);
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+  .output-placeholder {
+    color: var(--muted);
+    opacity: 0.5;
+    font-style: italic;
+    font-size: 0.88rem;
+  }
+  .action-row {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+  .btn-humanize {
+    padding: 14px 40px;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.95rem;
+    font-weight: 700;
+    cursor: pointer;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    box-shadow: 0 6px 24px rgba(124,106,255,0.35);
+    transition: all 0.18s;
+  }
+  .btn-humanize:hover { filter: brightness(1.12); transform: translateY(-2px); box-shadow: 0 10px 32px rgba(124,106,255,0.45); }
+  .btn-humanize:active { transform: translateY(0); }
+  .btn-copy {
+    padding: 14px 28px;
+    background: var(--surface2);
+    color: var(--text);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .btn-copy:hover { border-color: var(--accent); color: var(--accent2); }
+  .btn-clear {
+    padding: 14px 20px;
+    background: none;
+    color: var(--muted);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .btn-clear:hover { border-color: #ff6b6b; color: #ff6b6b; }
+  .toast-container { position: fixed; bottom: 24px; right: 20px; display: flex; flex-direction: column; gap: 10px; z-index: 999; }
+  .toast {
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    color: #fff;
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 700;
+    font-size: 0.82rem;
+    padding: 11px 20px;
+    border-radius: 10px;
+    animation: tIn 0.3s cubic-bezier(0.34,1.4,0.64,1), tOut 0.3s ease 2.5s forwards;
+    box-shadow: 0 6px 20px rgba(124,106,255,0.35);
+  }
+  @keyframes tIn  { from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:translateY(0); } }
+  @keyframes tOut { to   { opacity:0; transform:translateY(8px); } }
+  .badge-row {
+    display: flex;
+    gap: 8px;
+    margin-top: 18px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  .badge {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.6rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    padding: 4px 12px;
+    border-radius: 20px;
+    border: 1px solid var(--border);
+    color: var(--muted);
+  }
+</style>
+</head>
+<body>
+<header>
+  <div class="logo-wrap">
+    <div class="logo-icon">✍️</div>
+    <div>
+      <div class="logo">Text <em>Humanizer</em></div>
+      <div class="logo-sub">AI → Natural Writing</div>
+    </div>
+  </div>
+</header>
+<div class="shimmer-bar"></div>
+<div class="main">
+  <div class="hero">
+    <h1>Paste. Humanize. Done.</h1>
+    <p>Rewrites AI text to sound natural, varied, and authentically human</p>
+  </div>
+  <div class="controls">
+    <span class="strength-label">Intensity:</span>
+    <button class="strength-btn active" data-level="1" onclick="setLevel(1)">Light</button>
+    <button class="strength-btn" data-level="2" onclick="setLevel(2)">Medium</button>
+    <button class="strength-btn" data-level="3" onclick="setLevel(3)">Heavy</button>
+  </div>
+  <div class="editor-grid">
+    <div class="pane">
+      <div class="pane-header">
+        <div class="pane-label"><span class="dot-in"></span>Original Text</div>
+        <div class="word-count" id="in-count">0 words</div>
+      </div>
+      <textarea id="input" placeholder="Paste your AI-generated text here..."></textarea>
+    </div>
+    <div class="pane">
+      <div class="pane-header">
+        <div class="pane-label"><span class="dot-out"></span>Humanized Output</div>
+        <div class="word-count" id="out-count">0 words</div>
+      </div>
+      <div id="output"><span class="output-placeholder">Your humanized text will appear here...</span></div>
+    </div>
+  </div>
+  <div class="action-row">
+    <button class="btn-humanize" onclick="runHumanize()">Humanize →</button>
+    <button class="btn-copy" onclick="copyOutput()">Copy Output</button>
+    <button class="btn-clear" onclick="clearAll()">Clear</button>
+  </div>
+  <div class="badge-row">
+    <div class="badge">Contractions</div>
+    <div class="badge">Varied sentence length</div>
+    <div class="badge">Informal transitions</div>
+    <div class="badge">Formal word swap</div>
+    <div class="badge">Natural hedging</div>
+    <div class="badge">Discourse markers</div>
+    <div class="badge">Passive → active</div>
+  </div>
+</div>
+<div class="toast-container" id="toasts"></div>
+<script>
+  let level = 1;
+  function setLevel(n) {
+    level = n;
+    document.querySelectorAll('.strength-btn').forEach(b => {
+      b.classList.toggle('active', +b.dataset.level === n);
+    });
+  }
+  // ── WORD COUNT ──
+  function wordCount(str) {
+    return str.trim() ? str.trim().split(/\s+/).length : 0;
+  }
+  document.getElementById('input').addEventListener('input', () => {
+    document.getElementById('in-count').textContent = wordCount(document.getElementById('input').value) + ' words';
+  });
+  // ── TOAST ──
+  function toast(msg) {
+    const t = document.createElement('div');
+    t.className = 'toast';
+    t.textContent = msg;
+    document.getElementById('toasts').appendChild(t);
+    setTimeout(() => t.remove(), 3000);
+  }
+  // ── COPY ──
+  function copyOutput() {
+    const el = document.getElementById('output');
+    const text = el.innerText;
+    if (!text || el.querySelector('.output-placeholder')) { toast('Nothing to copy yet'); return; }
+    navigator.clipboard.writeText(text).then(() => toast('Copied to clipboard ✓'));
+  }
+  // ── CLEAR ──
+  function clearAll() {
+    document.getElementById('input').value = '';
+    document.getElementById('output').innerHTML = '<span class="output-placeholder">Your humanized text will appear here...</span>';
+    document.getElementById('in-count').textContent = '0 words';
+    document.getElementById('out-count').textContent = '0 words';
+  }
+  // ══════════════════════════════════════════
+  //  HUMANIZER ENGINE
+  // ══════════════════════════════════════════
+  // 1. Contractions
+  const contractions = [
+    [/\bit is\b/gi,        "it's"],
+    [/\bit has\b/gi,       "it's"],
+    [/\bthey are\b/gi,     "they're"],
+    [/\bthey have\b/gi,    "they've"],
+    [/\bthey will\b/gi,    "they'll"],
+    [/\bwe are\b/gi,       "we're"],
+    [/\bwe have\b/gi,      "we've"],
+    [/\bwe will\b/gi,      "we'll"],
+    [/\byou are\b/gi,      "you're"],
+    [/\byou have\b/gi,     "you've"],
+    [/\byou will\b/gi,     "you'll"],
+    [/\bI am\b/g,          "I'm"],
+    [/\bI have\b/g,        "I've"],
+    [/\bI will\b/g,        "I'll"],
+    [/\bI would\b/g,       "I'd"],
+    [/\bdo not\b/gi,       "don't"],
+    [/\bdoes not\b/gi,     "doesn't"],
+    [/\bdid not\b/gi,      "didn't"],
+    [/\bcannot\b/gi,       "can't"],
+    [/\bcan not\b/gi,      "can't"],
+    [/\bwill not\b/gi,     "won't"],
+    [/\bwould not\b/gi,    "wouldn't"],
+    [/\bshould not\b/gi,   "shouldn't"],
+    [/\bcould not\b/gi,    "couldn't"],
+    [/\bmust not\b/gi,     "mustn't"],
+    [/\bwas not\b/gi,      "wasn't"],
+    [/\bwere not\b/gi,     "weren't"],
+    [/\bhave not\b/gi,     "haven't"],
+    [/\bhas not\b/gi,      "hasn't"],
+    [/\bhad not\b/gi,      "hadn't"],
+    [/\bthat is\b/gi,      "that's"],
+    [/\bthere is\b/gi,     "there's"],
+    [/\bthere are\b/gi,    "there're"],
+    [/\bwhat is\b/gi,      "what's"],
+    [/\bwho is\b/gi,       "who's"],
+    [/\bhe is\b/gi,        "he's"],
+    [/\bshe is\b/gi,       "she's"],
+  ];
+  // 2. Formal → casual word swaps
+  const formalSwaps = [
+    [/\butilize[sd]?\b/gi,           "use"],
+    [/\butilization\b/gi,            "use"],
+    [/\bcommence[sd]?\b/gi,          "start"],
+    [/\bpurchase[sd]?\b/gi,          "buy"],
+    [/\bdemonstrate[sd]?\b/gi,       "show"],
+    [/\bfacilitate[sd]?\b/gi,        "help"],
+    [/\bimplementation\b/gi,         "rollout"],
+    [/\bsubsequently\b/gi,           "then"],
+    [/\bconsequently\b/gi,           "as a result"],
+    [/\bnevertheless\b/gi,           "still"],
+    [/\bnotwithstanding\b/gi,        "even so"],
+    [/\bfurthermore\b/gi,            "on top of that"],
+    [/\bmoreover\b/gi,               "also"],
+    [/\bin addition\b/gi,            "plus"],
+    [/\bin conclusion\b/gi,          "to wrap up"],
+    [/\bin summary\b/gi,             "basically"],
+    [/\bto summarize\b/gi,           "in short"],
+    [/\bsubstantial\b/gi,            "significant"],
+    [/\bnumerous\b/gi,               "many"],
+    [/\bindividuals\b/gi,            "people"],
+    [/\bprior to\b/gi,               "before"],
+    [/\bsubsequent to\b/gi,          "after"],
+    [/\bin order to\b/gi,            "to"],
+    [/\bdue to the fact that\b/gi,   "because"],
+    [/\bfor the purpose of\b/gi,     "to"],
+    [/\bit is important to note\b/gi,"notably"],
+    [/\bit should be noted\b/gi,     "notably"],
+    [/\bone must consider\b/gi,      "consider this"],
+    [/\bprovide[sd]?\b/gi,           "give"],
+    [/\bobtain[ed]?\b/gi,            "get"],
+    [/\bascertain[ed]?\b/gi,         "find out"],
+    [/\binquire[sd]?\b/gi,           "ask"],
+    [/\bterminate[sd]?\b/gi,         "end"],
+    [/\binitiate[sd]?\b/gi,          "start"],
+    [/\bsufficient\b/gi,             "enough"],
+    [/\bexceedingly\b/gi,            "very"],
+    [/\bextremely\b/gi,              "really"],
+    [/\bvery important\b/gi,         "key"],
+  ];
+  // 3. Discourse markers to inject at sentence starts (randomly)
+  const discourseMarkers = [
+    "Honestly, ", "In fact, ", "Of course, ", "Look, ",
+    "Sure, ", "Here's the thing — ", "The truth is, ",
+    "Interestingly, ", "Worth noting, ", "That said, ",
+    "At the end of the day, ", "Realistically, ",
+  ];
+  // 4. Transition replacements (heavy clinical → natural)
+  const transitionSwaps = [
+    [/^However,?\s*/i,    "But "],
+    [/^Therefore,?\s*/i,  "So "],
+    [/^Thus,?\s*/i,       "So "],
+    [/^Hence,?\s*/i,      "That's why "],
+    [/^Additionally,?\s*/i, "Also, "],
+    [/^In conclusion,?\s*/i, "To wrap up, "],
+    [/^To conclude,?\s*/i,   "In the end, "],
+    [/^As a result,?\s*/i,   "Because of this, "],
+    [/^For instance,?\s*/i,  "Take, for example, "],
+    [/^For example,?\s*/i,   "For instance, "],
+  ];
+  // 5. Passive-ish patterns → active-ish
+  const passiveSwaps = [
+    [/\bit can be seen that\b/gi,    "clearly,"],
+    [/\bit is widely known that\b/gi, "everyone knows that"],
+    [/\bit has been shown that\b/gi,  "research shows that"],
+    [/\bit is believed that\b/gi,     "many believe that"],
+    [/\bit is argued that\b/gi,       "the argument is that"],
+    [/\bit is noted that\b/gi,        "notably,"],
+    [/\bit is clear that\b/gi,        "clearly,"],
+    [/\bone can see that\b/gi,        "you can see that"],
+    [/\bone may argue\b/gi,           "you could argue"],
+    [/\bthe fact that\b/gi,           "the reality that"],
+  ];
+  // ── SENTENCE SPLITTER: break very long sentences at "and/but/which" ──
+  function breakLongSentences(text) {
+    return text.replace(/([^.!?]{80,}?),\s+(and|but|which|while|although|whereas|though)\s+/gi,
+      (match, pre, conj) => {
+        const cap = conj.charAt(0).toUpperCase() + conj.slice(1);
+        return pre + '. ' + cap + ' ';
+      }
+    );
+  }
+  // ── INJECT DISCOURSE MARKERS (randomly per paragraph) ──
+  function injectMarkers(sentences, probability) {
+    return sentences.map((s, i) => {
+      if (i === 0) return s; // never touch first sentence
+      if (Math.random() < probability) {
+        // only inject if sentence doesn't already start with a marker word
+        const lower = s.trim().toLowerCase();
+        const alreadyMarked = ["but ", "so ", "also ", "plus ", "look,", "honestly,", "in fact,", "of course,"].some(m => lower.startsWith(m));
+        if (!alreadyMarked) {
+          const marker = discourseMarkers[Math.floor(Math.random() * discourseMarkers.length)];
+          return marker + s.trim().charAt(0).toLowerCase() + s.trim().slice(1);
+        }
+      }
+      return s;
+    });
+  }
+  // ── VARY SENTENCE ENDINGS: occasionally add em-dash aside ──
+  const asides = [
+    " — and that matters",
+    " — which is key",
+    " — worth keeping in mind",
+    " — something often overlooked",
+  ];
+  function addAsides(sentences, probability) {
+    return sentences.map(s => {
+      if (Math.random() < probability && s.endsWith('.') && s.length > 60) {
+        const aside = asides[Math.floor(Math.random() * asides.length)];
+        return s.slice(0, -1) + aside + '.';
+      }
+      return s;
+    });
+  }
+  // ── SPLIT TEXT INTO SENTENCES ──
+  function splitSentences(text) {
+    return text.match(/[^.!?]+[.!?]*/g) || [text];
+  }
+  // ── MAIN HUMANIZE FUNCTION ──
+  function humanize(raw, intensity) {
+    let text = raw;
+    // Step 1: contractions (always)
+    contractions.forEach(([pat, rep]) => { text = text.replace(pat, rep); });
+    // Step 2: formal word swaps
+    formalSwaps.forEach(([pat, rep]) => { text = text.replace(pat, rep); });
+    // Step 3: passive → active
+    passiveSwaps.forEach(([pat, rep]) => { text = text.replace(pat, rep); });
+    // Step 4: process paragraph by paragraph
+    const paragraphs = text.split(/\n\n+/);
+    const markerProb  = intensity === 1 ? 0.08 : intensity === 2 ? 0.18 : 0.28;
+    const asideProb   = intensity === 1 ? 0.03 : intensity === 2 ? 0.07 : 0.12;
+    const breakLong   = intensity >= 2;
+    const processedParas = paragraphs.map(para => {
+      let p = para.trim();
+      if (!p) return '';
+      // Break long sentences (medium/heavy)
+      if (breakLong) p = breakLongSentences(p);
+      // Transition word swaps at sentence level
+      let sentences = splitSentences(p);
+      sentences = sentences.map(s => {
+        let out = s;
+        transitionSwaps.forEach(([pat, rep]) => { out = out.replace(pat, rep); });
+        return out;
+      });
+      // Inject discourse markers
+      sentences = injectMarkers(sentences, markerProb);
+      // Add asides (heavy only)
+      if (intensity === 3) sentences = addAsides(sentences, asideProb);
+      return sentences.join('').trim();
+    });
+    let result = processedParas.filter(Boolean).join('\n\n');
+    // Step 5: clean up double spaces / stray artifacts
+    result = result.replace(/  +/g, ' ');
+    result = result.replace(/ ,/g, ',');
+    result = result.replace(/ \./g, '.');
+    return result;
+  }
+  // ── RUN ──
+  function runHumanize() {
+    const input = document.getElementById('input').value.trim();
+    if (!input) { toast('Paste some text first'); return; }
+    const result = humanize(input, level);
+    const outputEl = document.getElementById('output');
+    outputEl.textContent = result;
+    document.getElementById('out-count').textContent = wordCount(result) + ' words';
+    toast('Humanized ✓');
+  }
+</script>
+</body>
