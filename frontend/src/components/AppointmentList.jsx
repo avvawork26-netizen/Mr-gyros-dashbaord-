@@ -2,15 +2,9 @@ import React, { useEffect, useState } from 'react';
 import { api } from '../api/client';
 
 const TYPE_LABELS = {
-  consultation: { label: 'Consultation', icon: '🤝', color: 'bg-blue-100 text-blue-700' },
-  showing:      { label: 'Showing',      icon: '🏠', color: 'bg-emerald-100 text-emerald-700' },
-  follow_up:    { label: 'Follow-up',    icon: '📞', color: 'bg-purple-100 text-purple-700' },
-};
-
-const STATUS_COLORS = {
-  scheduled:  'bg-emerald-100 text-emerald-700',
-  completed:  'bg-slate-100 text-slate-500',
-  cancelled:  'bg-red-100 text-red-600',
+  consultation: { label: 'Consultation' },
+  showing:      { label: 'Showing' },
+  follow_up:    { label: 'Follow-up' },
 };
 
 function formatDate(dateStr) {
@@ -26,7 +20,6 @@ function formatTime(timeStr) {
   return `${h12}:${m} ${ampm}`;
 }
 
-// Group appointments by date
 function groupByDate(appts) {
   const groups = {};
   appts.forEach((a) => {
@@ -36,10 +29,16 @@ function groupByDate(appts) {
   return Object.entries(groups).sort(([a], [b]) => a.localeCompare(b));
 }
 
+const STATUS_STYLE = {
+  scheduled:  { background: 'rgba(74,158,255,0.08)', color: '#4A9EFF',  border: '1px solid rgba(74,158,255,0.2)' },
+  completed:  { background: 'transparent',            color: '#444444',  border: '1px solid #333333' },
+  cancelled:  { background: 'transparent',            color: '#333333',  border: '1px solid #222222' },
+};
+
 export default function AppointmentList() {
   const [appointments, setAppointments] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [filter, setFilter] = useState('upcoming'); // upcoming | all | today
+  const [filter, setFilter] = useState('upcoming');
 
   useEffect(() => {
     api.getAppointments()
@@ -73,46 +72,56 @@ export default function AppointmentList() {
 
   const grouped = groupByDate(filtered);
 
+  const FILTERS = [
+    { key: 'upcoming', label: 'Upcoming' },
+    { key: 'today',    label: 'Today' },
+    { key: 'all',      label: 'All' },
+  ];
+
   return (
     <div className="p-6 max-w-4xl mx-auto">
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="font-serif text-2xl font-bold text-navy-900">Appointments</h1>
-          <p className="text-slate-500 text-sm mt-0.5">
-            Ayoub's schedule · Mon–Fri, 9am–5pm EST
+          <h1 className="text-xl font-semibold text-white tracking-tight">Appointments</h1>
+          <p className="text-xs mt-0.5" style={{ color: '#444444' }}>
+            Mon–Fri · 9am–5pm EST
           </p>
         </div>
       </div>
 
       {/* Filters */}
-      <div className="flex gap-1 bg-white border border-slate-200 rounded-lg p-1 shadow-sm w-fit mb-5">
-        {[
-          { key: 'upcoming', label: 'Upcoming' },
-          { key: 'today',    label: 'Today' },
-          { key: 'all',      label: 'All' },
-        ].map(({ key, label }) => (
+      <div className="flex gap-0 w-fit mb-5" style={{ border: '1px solid #222222' }}>
+        {FILTERS.map(({ key, label }) => (
           <button
             key={key}
             onClick={() => setFilter(key)}
-            className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
-              filter === key ? 'bg-navy-800 text-white' : 'text-slate-600 hover:bg-slate-100'
-            }`}
+            className="px-3 py-1.5 text-xs font-medium transition-colors"
+            style={{
+              background: filter === key ? '#4A9EFF' : 'transparent',
+              color: filter === key ? '#000000' : '#666666',
+              borderRight: '1px solid #222222',
+              letterSpacing: '0.05em',
+            }}
           >
-            {label}
+            {label.toUpperCase()}
           </button>
         ))}
       </div>
 
       {loading ? (
         <div className="flex justify-center py-16">
-          <div className="w-7 h-7 border-2 border-navy-800 border-t-transparent rounded-full animate-spin" />
+          <div
+            className="w-5 h-5 border-2 animate-spin"
+            style={{ borderColor: '#4A9EFF', borderTopColor: 'transparent' }}
+          />
         </div>
       ) : grouped.length === 0 ? (
-        <div className="card text-center py-16 text-slate-400">
-          <p className="text-4xl mb-2">📅</p>
-          <p className="font-medium">No appointments found</p>
-          <p className="text-sm mt-1">Ava will book appointments when leads are ready</p>
+        <div className="card text-center py-16">
+          <p className="font-medium text-white">No appointments found</p>
+          <p className="text-xs mt-1" style={{ color: '#444444' }}>
+            Ava will book appointments when leads are ready
+          </p>
         </div>
       ) : (
         <div className="space-y-6">
@@ -122,59 +131,80 @@ export default function AppointmentList() {
               <div key={date}>
                 {/* Date header */}
                 <div className="flex items-center gap-3 mb-3">
-                  <h2 className={`font-semibold text-sm ${isToday ? 'text-gold-600' : 'text-slate-500'}`}>
-                    {isToday ? '📍 Today — ' : ''}{formatDate(date)}
+                  <h2
+                    className="text-xs font-semibold"
+                    style={{ color: isToday ? '#4A9EFF' : '#444444', letterSpacing: '0.1em' }}
+                  >
+                    {isToday ? 'TODAY — ' : ''}{formatDate(date).toUpperCase()}
                   </h2>
-                  <div className="flex-1 h-px bg-slate-200" />
-                  <span className="text-xs text-slate-400">{appts.length} appt{appts.length !== 1 ? 's' : ''}</span>
+                  <div className="flex-1 h-px" style={{ background: '#1a1a1a' }} />
+                  <span className="text-xs" style={{ color: '#333333' }}>
+                    {appts.length} appt{appts.length !== 1 ? 's' : ''}
+                  </span>
                 </div>
 
-                <div className="card divide-y divide-slate-100">
-                  {appts.map((appt) => {
+                <div className="card">
+                  {appts.map((appt, i) => {
                     const typeCfg = TYPE_LABELS[appt.type] || TYPE_LABELS.consultation;
+                    const statusStyle = STATUS_STYLE[appt.status] || STATUS_STYLE.scheduled;
                     return (
-                      <div key={appt.id} className="flex items-center gap-4 px-5 py-4">
+                      <div
+                        key={appt.id}
+                        className="flex items-center gap-4 px-5 py-4"
+                        style={{ borderBottom: i < appts.length - 1 ? '1px solid #1a1a1a' : 'none' }}
+                      >
                         {/* Time */}
                         <div className="w-16 shrink-0 text-right">
-                          <p className="font-bold text-navy-800 text-base leading-tight">
+                          <p className="font-bold text-white text-sm leading-tight">
                             {formatTime(appt.time)}
                           </p>
                         </div>
 
-                        <div className="w-px h-10 bg-slate-200 shrink-0" />
+                        <div className="w-px h-8 shrink-0" style={{ background: '#222222' }} />
 
                         {/* Details */}
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2 flex-wrap">
-                            <p className="font-semibold text-navy-900">{appt.lead_name}</p>
-                            <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${typeCfg.color}`}>
-                              {typeCfg.icon} {typeCfg.label}
+                            <p className="font-semibold text-white">{appt.lead_name}</p>
+                            <span
+                              className="text-xs px-2 py-0.5 font-medium"
+                              style={{ background: '#1c2d42', color: '#4A9EFF', border: '1px solid rgba(74,158,255,0.2)' }}
+                            >
+                              {typeCfg.label.toUpperCase()}
                             </span>
                           </div>
                           {appt.lead_phone && (
-                            <p className="text-xs text-slate-400 mt-0.5">{appt.lead_phone}</p>
+                            <p className="text-xs mt-0.5" style={{ color: '#444444' }}>
+                              {appt.lead_phone}
+                            </p>
                           )}
                           {appt.notes && (
-                            <p className="text-xs text-slate-500 mt-1 italic truncate">{appt.notes}</p>
+                            <p className="text-xs mt-1 italic truncate" style={{ color: '#666666' }}>
+                              {appt.notes}
+                            </p>
                           )}
                         </div>
 
-                        {/* Status + actions */}
+                        {/* Status + delete */}
                         <div className="flex items-center gap-2 shrink-0">
                           <select
                             value={appt.status}
                             onChange={(e) => handleStatusChange(appt.id, e.target.value)}
-                            className={`text-xs font-medium px-2 py-1 rounded-full border-0 cursor-pointer ${STATUS_COLORS[appt.status]}`}
+                            className="text-xs font-medium px-2 py-1 cursor-pointer"
+                            style={{ ...statusStyle, outline: 'none' }}
                           >
                             {['scheduled', 'completed', 'cancelled'].map((s) => (
-                              <option key={s} value={s} className="bg-white text-slate-800">
+                              <option key={s} value={s} style={{ background: '#161616', color: '#ffffff' }}>
                                 {s.charAt(0).toUpperCase() + s.slice(1)}
                               </option>
                             ))}
                           </select>
                           <button
                             onClick={() => handleDelete(appt.id)}
-                            className="p-1 text-slate-400 hover:text-red-500 transition-colors"
+                            className="text-sm transition-colors"
+                            style={{ color: '#333333' }}
+                            onMouseEnter={(e) => { e.currentTarget.style.color = '#ffffff'; }}
+                            onMouseLeave={(e) => { e.currentTarget.style.color = '#333333'; }}
                             title="Delete appointment"
                           >
                             ×

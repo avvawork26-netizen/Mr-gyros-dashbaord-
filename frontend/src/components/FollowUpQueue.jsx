@@ -1,16 +1,16 @@
 import React, { useEffect, useState } from 'react';
 import { api } from '../api/client';
 
-const STATUS_CONFIG = {
-  pending:   { label: 'Pending',   color: 'bg-amber-100 text-amber-700' },
-  sent:      { label: 'Sent',      color: 'bg-emerald-100 text-emerald-700' },
-  cancelled: { label: 'Cancelled', color: 'bg-slate-100 text-slate-500' },
+const STATUS_STYLE = {
+  pending:   { background: 'rgba(74,158,255,0.08)', color: '#4A9EFF',  border: '1px solid rgba(74,158,255,0.2)' },
+  sent:      { background: 'transparent',            color: '#444444',  border: '1px solid #333333' },
+  cancelled: { background: 'transparent',            color: '#333333',  border: '1px solid #222222' },
 };
 
 const URGENCY_CONFIG = {
-  hot:  { badge: 'badge-hot',  icon: '🔥' },
-  warm: { badge: 'badge-warm', icon: '🌡️' },
-  cold: { badge: 'badge-cold', icon: '❄️' },
+  hot:  { badge: 'badge-hot' },
+  warm: { badge: 'badge-warm' },
+  cold: { badge: 'badge-cold' },
 };
 
 const TEMPLATE_LABELS = {
@@ -75,60 +75,85 @@ export default function FollowUpQueue() {
     return f.status === 'pending' && new Date(f.scheduled_date) <= new Date();
   }).length;
 
+  const FILTERS = [
+    { key: 'pending',   label: 'Pending' },
+    { key: 'sent',      label: 'Sent' },
+    { key: 'cancelled', label: 'Cancelled' },
+    { key: 'all',       label: 'All' },
+  ];
+
   return (
     <div className="p-6 max-w-4xl mx-auto">
       {/* Header */}
       <div className="flex items-start justify-between mb-6">
         <div>
-          <h1 className="font-serif text-2xl font-bold text-navy-900">Follow-up Queue</h1>
-          <p className="text-slate-500 text-sm mt-0.5">
-            Ava automatically schedules Day 1, 3, and 7 follow-ups for each new lead
+          <h1 className="text-xl font-semibold text-white tracking-tight">Follow-up Queue</h1>
+          <p className="text-xs mt-0.5" style={{ color: '#444444' }}>
+            Day 1, 3, and 7 follow-ups are scheduled automatically per lead
           </p>
         </div>
         <button
           onClick={handleProcessNow}
           disabled={processing}
-          className="btn-gold flex items-center gap-2"
+          className="btn-dim flex items-center gap-2"
+          style={{ opacity: processing ? 0.6 : 1 }}
         >
           {processing ? (
             <>
-              <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+              <div
+                className="w-3.5 h-3.5 border-2 animate-spin"
+                style={{ borderColor: '#4A9EFF', borderTopColor: 'transparent' }}
+              />
               Processing...
             </>
           ) : (
-            <>⚡ Process Due Now</>
+            'Process Due Now'
           )}
         </button>
       </div>
 
-      {/* Stats banner */}
+      {/* Overdue banner */}
       {overdueCount > 0 && (
-        <div className="mb-4 px-4 py-3 bg-amber-50 border border-amber-200 rounded-lg flex items-center gap-3">
-          <span className="text-amber-600 text-lg">⚠️</span>
-          <p className="text-sm text-amber-800 font-medium">
-            {overdueCount} follow-up{overdueCount !== 1 ? 's' : ''} overdue — click "Process Due Now" to send via Ava
+        <div
+          className="mb-4 px-4 py-3 flex items-center gap-3"
+          style={{
+            background: 'rgba(74,158,255,0.05)',
+            border: '1px solid rgba(74,158,255,0.2)',
+            borderLeft: '3px solid #4A9EFF',
+          }}
+        >
+          <p className="text-sm font-medium" style={{ color: '#4A9EFF' }}>
+            {overdueCount} follow-up{overdueCount !== 1 ? 's' : ''} overdue
+          </p>
+          <p className="text-xs" style={{ color: '#666666' }}>
+            Click "Process Due Now" to send via Ava
           </p>
         </div>
       )}
 
       {/* Filters */}
-      <div className="flex gap-1 bg-white border border-slate-200 rounded-lg p-1 shadow-sm w-fit mb-5">
-        {[
-          { key: 'pending',  label: 'Pending' },
-          { key: 'sent',     label: 'Sent' },
-          { key: 'cancelled',label: 'Cancelled' },
-          { key: 'all',      label: 'All' },
-        ].map(({ key, label }) => (
+      <div className="flex gap-0 w-fit mb-5" style={{ border: '1px solid #222222' }}>
+        {FILTERS.map(({ key, label }) => (
           <button
             key={key}
             onClick={() => setFilter(key)}
-            className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
-              filter === key ? 'bg-navy-800 text-white' : 'text-slate-600 hover:bg-slate-100'
-            }`}
+            className="px-3 py-1.5 text-xs font-medium transition-colors relative"
+            style={{
+              background: filter === key ? '#4A9EFF' : 'transparent',
+              color: filter === key ? '#000000' : '#666666',
+              borderRight: '1px solid #222222',
+              letterSpacing: '0.05em',
+            }}
           >
-            {label}
+            {label.toUpperCase()}
             {key === 'pending' && pendingCount > 0 && (
-              <span className="ml-1 px-1.5 py-0.5 rounded-full bg-amber-500 text-white text-xs leading-none">
+              <span
+                className="ml-1.5 px-1.5 py-0.5 text-xs leading-none font-bold"
+                style={{
+                  background: filter === key ? 'rgba(0,0,0,0.2)' : '#4A9EFF',
+                  color: filter === key ? '#000' : '#000',
+                }}
+              >
                 {pendingCount}
               </span>
             )}
@@ -139,69 +164,97 @@ export default function FollowUpQueue() {
       {/* List */}
       {loading ? (
         <div className="flex justify-center py-16">
-          <div className="w-7 h-7 border-2 border-navy-800 border-t-transparent rounded-full animate-spin" />
+          <div
+            className="w-5 h-5 border-2 animate-spin"
+            style={{ borderColor: '#4A9EFF', borderTopColor: 'transparent' }}
+          />
         </div>
       ) : followups.length === 0 ? (
-        <div className="card text-center py-16 text-slate-400">
-          <p className="text-4xl mb-2">🔔</p>
-          <p className="font-medium">No follow-ups in this category</p>
-          <p className="text-sm mt-1">New leads automatically get Day 1, 3, and 7 follow-ups</p>
+        <div className="card text-center py-16">
+          <p className="font-medium text-white">No follow-ups in this category</p>
+          <p className="text-xs mt-1" style={{ color: '#444444' }}>
+            New leads automatically get Day 1, 3, and 7 follow-ups
+          </p>
         </div>
       ) : (
-        <div className="card divide-y divide-slate-100">
-          {followups.map((f) => {
+        <div className="card">
+          {followups.map((f, i) => {
             const urgencyCfg = URGENCY_CONFIG[f.lead_urgency] || URGENCY_CONFIG.cold;
-            const statusCfg  = STATUS_CONFIG[f.status];
-            const dateInfo   = formatScheduledDate(f.scheduled_date);
+            const statusStyle = STATUS_STYLE[f.status] || STATUS_STYLE.pending;
+            const dateInfo    = formatScheduledDate(f.scheduled_date);
 
             return (
-              <div key={f.id} className="flex items-center gap-4 px-5 py-4 hover:bg-slate-50 transition-colors">
-                {/* Urgency dot */}
-                <div className={`w-2.5 h-2.5 rounded-full shrink-0 ${
-                  f.lead_urgency === 'hot' ? 'bg-red-500' :
-                  f.lead_urgency === 'warm' ? 'bg-amber-400' : 'bg-blue-400'
-                }`} />
+              <div
+                key={f.id}
+                className="flex items-center gap-4 px-5 py-4 transition-colors"
+                style={{
+                  borderBottom: i < followups.length - 1 ? '1px solid #1a1a1a' : 'none',
+                }}
+                onMouseEnter={(e) => { e.currentTarget.style.background = '#1a1a1a'; }}
+                onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; }}
+              >
+                {/* Urgency indicator */}
+                <div
+                  className="w-1.5 h-1.5 rounded-full shrink-0"
+                  style={{
+                    background:
+                      f.lead_urgency === 'hot'  ? '#4A9EFF' :
+                      f.lead_urgency === 'warm' ? '#888888' : '#333333',
+                  }}
+                />
 
                 {/* Lead info */}
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 flex-wrap">
-                    <p className="font-semibold text-navy-900">{f.lead_name}</p>
-                    <span className={urgencyCfg.badge}>{urgencyCfg.icon} {f.lead_urgency}</span>
+                    <p className="font-medium text-white">{f.lead_name}</p>
+                    <span className={urgencyCfg.badge}>{f.lead_urgency.toUpperCase()}</span>
                   </div>
-                  <p className="text-xs text-slate-500 mt-0.5">
+                  <p className="text-xs mt-0.5" style={{ color: '#444444' }}>
                     {TEMPLATE_LABELS[f.message_template] || f.message_template}
                   </p>
                   {f.lead_phone && (
-                    <p className="text-xs text-slate-400">{f.lead_phone}</p>
+                    <p className="text-xs" style={{ color: '#333333' }}>{f.lead_phone}</p>
                   )}
                 </div>
 
                 {/* Due date */}
                 <div className="shrink-0 text-right">
-                  <p className={`text-xs font-semibold ${dateInfo.overdue ? 'text-red-600' : 'text-slate-500'}`}>
+                  <p
+                    className="text-xs font-semibold"
+                    style={{ color: dateInfo.overdue ? '#4A9EFF' : '#666666' }}
+                  >
                     {dateInfo.label}
                   </p>
-                  <p className="text-xs text-slate-400 mt-0.5">
+                  <p className="text-xs mt-0.5" style={{ color: '#333333' }}>
                     {new Date(f.scheduled_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
                   </p>
                 </div>
 
                 {/* Status + actions */}
                 <div className="flex items-center gap-2 shrink-0">
-                  <span className={`text-xs font-medium px-2 py-1 rounded-full ${statusCfg.color}`}>
-                    {statusCfg.label}
+                  <span
+                    className="text-xs font-medium px-2 py-1"
+                    style={statusStyle}
+                  >
+                    {f.status.charAt(0).toUpperCase() + f.status.slice(1)}
                   </span>
                   {f.status === 'pending' && (
                     <>
                       <button
                         onClick={() => handleStatusChange(f.id, 'sent')}
-                        className="px-2 py-1 text-xs rounded bg-emerald-100 hover:bg-emerald-200 text-emerald-700 font-medium transition-colors"
+                        className="px-2 py-1 text-xs font-medium transition-colors"
+                        style={{ background: 'rgba(74,158,255,0.1)', color: '#4A9EFF', border: '1px solid rgba(74,158,255,0.2)' }}
+                        onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(74,158,255,0.2)'; }}
+                        onMouseLeave={(e) => { e.currentTarget.style.background = 'rgba(74,158,255,0.1)'; }}
                       >
                         Mark Sent
                       </button>
                       <button
                         onClick={() => handleStatusChange(f.id, 'cancelled')}
-                        className="px-2 py-1 text-xs rounded bg-slate-100 hover:bg-slate-200 text-slate-600 font-medium transition-colors"
+                        className="px-2 py-1 text-xs font-medium transition-colors"
+                        style={{ background: 'transparent', color: '#444444', border: '1px solid #222222' }}
+                        onMouseEnter={(e) => { e.currentTarget.style.borderColor = '#444444'; e.currentTarget.style.color = '#ffffff'; }}
+                        onMouseLeave={(e) => { e.currentTarget.style.borderColor = '#222222'; e.currentTarget.style.color = '#444444'; }}
                       >
                         Cancel
                       </button>

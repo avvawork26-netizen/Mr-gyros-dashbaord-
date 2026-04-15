@@ -22,7 +22,7 @@ export default function App() {
         <Route
           path="/*"
           element={
-            <div className="flex h-screen bg-slate-50 overflow-hidden">
+            <div className="flex h-screen overflow-hidden" style={{ background: '#0a0a0a' }}>
               <Sidebar />
               <main className="flex-1 overflow-y-auto">
                 <Routes>

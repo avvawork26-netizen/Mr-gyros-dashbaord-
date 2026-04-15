@@ -2,50 +2,74 @@ import React from 'react';
 import { NavLink } from 'react-router-dom';
 
 const NAV = [
-  { to: '/',              icon: '⊞', label: 'Dashboard' },
-  { to: '/leads',         icon: '👥', label: 'Leads' },
-  { to: '/conversations', icon: '💬', label: 'Conversations' },
-  { to: '/appointments',  icon: '📅', label: 'Appointments' },
-  { to: '/followups',     icon: '🔔', label: 'Follow-ups' },
+  { to: '/',              label: 'Dashboard' },
+  { to: '/leads',         label: 'Leads' },
+  { to: '/conversations', label: 'Conversations' },
+  { to: '/appointments',  label: 'Appointments' },
+  { to: '/followups',     label: 'Follow-ups' },
 ];
+
+function DiamondIcon() {
+  return (
+    <svg width="22" height="22" viewBox="0 0 22 22" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <polygon points="11,2 18,11 11,20 4,11" fill="none" stroke="#4A9EFF" strokeWidth="1.5" />
+      <polygon points="11,6 16,11 11,16 6,11" fill="#4A9EFF" opacity="0.25" />
+      <polygon points="11,6 16,11 11,16 6,11" fill="none" stroke="#4A9EFF" strokeWidth="1" />
+    </svg>
+  );
+}
 
 export default function Sidebar() {
   return (
-    <aside className="w-60 flex-shrink-0 bg-navy-900 text-white flex flex-col shadow-xl">
+    <aside
+      className="w-56 flex-shrink-0 flex flex-col"
+      style={{ background: '#111111', borderRight: '1px solid #222222' }}
+    >
       {/* Logo */}
-      <div className="px-6 pt-8 pb-6 border-b border-navy-700">
+      <div className="px-5 pt-7 pb-6" style={{ borderBottom: '1px solid #222222' }}>
         <div className="flex items-center gap-2.5">
-          <div className="w-9 h-9 rounded-lg bg-gold-500 flex items-center justify-center text-lg">
-            🏠
-          </div>
+          <DiamondIcon />
           <div>
-            <div className="font-serif text-lg font-semibold leading-tight text-white">Ava</div>
-            <div className="text-xs text-navy-300 leading-tight">AI Realtor Assistant</div>
+            <div
+              className="text-white font-bold tracking-[0.2em] text-base leading-none"
+              style={{ letterSpacing: '0.25em' }}
+            >
+              AVA
+            </div>
+            <div className="text-xs mt-0.5" style={{ color: '#444444', letterSpacing: '0.08em' }}>
+              AI REALTOR
+            </div>
           </div>
         </div>
-        <div className="mt-3 px-2 py-1.5 bg-navy-800 rounded-lg">
-          <p className="text-xs text-navy-300">
-            <span className="text-gold-400 font-medium">Ayoub</span> · Orlando & Florida Coast
-          </p>
+        <div
+          className="mt-4 px-3 py-2 text-xs"
+          style={{ background: '#161616', border: '1px solid #222222', color: '#666666' }}
+        >
+          <span style={{ color: '#4A9EFF' }}>AYOUB</span>
+          {' · '}Orlando &amp; Florida Coast
         </div>
       </div>
 
       {/* Nav links */}
-      <nav className="flex-1 px-3 py-4 space-y-0.5">
-        {NAV.map(({ to, icon, label }) => (
+      <nav className="flex-1 py-4">
+        {NAV.map(({ to, label }) => (
           <NavLink
             key={to}
             to={to}
             end={to === '/'}
             className={({ isActive }) =>
-              `flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
+              `flex items-center px-5 py-2.5 text-sm font-medium transition-colors ${
                 isActive
-                  ? 'bg-gold-500 text-white shadow-sm'
-                  : 'text-navy-300 hover:bg-navy-800 hover:text-white'
+                  ? 'border-l-2 text-white'
+                  : 'border-l-2 border-transparent hover:text-white'
               }`
             }
+            style={({ isActive }) => ({
+              borderLeftColor: isActive ? '#4A9EFF' : 'transparent',
+              color: isActive ? '#ffffff' : '#666666',
+              background: isActive ? 'rgba(74,158,255,0.06)' : 'transparent',
+            })}
           >
-            <span className="text-base w-5 text-center">{icon}</span>
             {label}
           </NavLink>
         ))}
@@ -57,11 +81,23 @@ export default function Sidebar() {
           href="/chat"
           target="_blank"
           rel="noreferrer"
-          className="flex items-center justify-center gap-2 w-full py-2.5 rounded-lg border border-navy-600 text-navy-300 hover:bg-navy-800 hover:text-white text-sm font-medium transition-colors"
+          className="flex items-center justify-center w-full py-2 text-xs font-medium transition-colors"
+          style={{
+            border: '1px solid #222222',
+            color: '#666666',
+            letterSpacing: '0.08em',
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.borderColor = '#444444';
+            e.currentTarget.style.color = '#ffffff';
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.borderColor = '#222222';
+            e.currentTarget.style.color = '#666666';
+          }}
         >
-          <span>🤖</span> Open Chat Widget
+          OPEN CHAT WIDGET
         </a>
-        <p className="text-center text-xs text-navy-500 mt-2">Preview Ava's chat interface</p>
       </div>
     </aside>
   );

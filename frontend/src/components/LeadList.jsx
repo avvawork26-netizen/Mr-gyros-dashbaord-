@@ -3,38 +3,32 @@ import { useNavigate } from 'react-router-dom';
 import { api } from '../api/client';
 
 const URGENCY_CONFIG = {
-  hot:  { label: 'Hot',  badge: 'badge-hot',  icon: '🔥' },
-  warm: { label: 'Warm', badge: 'badge-warm', icon: '🌡️' },
-  cold: { label: 'Cold', badge: 'badge-cold', icon: '❄️' },
+  hot:  { label: 'Hot',  badge: 'badge-hot' },
+  warm: { label: 'Warm', badge: 'badge-warm' },
+  cold: { label: 'Cold', badge: 'badge-cold' },
 };
 
 const INTENT_MAP = {
-  buy: { label: 'Buyer',    cls: 'badge-buy' },
-  sell:{ label: 'Seller',   cls: 'badge-sell' },
-  rent:{ label: 'Renter',   cls: 'badge-rent' },
-  invest:{ label: 'Investor', cls: 'badge-invest' },
-  unknown:{ label: '—',    cls: 'badge-unknown' },
+  buy:     { label: 'Buyer',    cls: 'badge-buy' },
+  sell:    { label: 'Seller',   cls: 'badge-sell' },
+  rent:    { label: 'Renter',   cls: 'badge-rent' },
+  invest:  { label: 'Investor', cls: 'badge-invest' },
+  unknown: { label: '—',        cls: 'badge-unknown' },
 };
 
-const STATUS_COLORS = {
-  new:       'bg-slate-100 text-slate-600',
-  active:    'bg-blue-100 text-blue-700',
-  escalated: 'bg-red-100 text-red-700',
-  closed:    'bg-slate-200 text-slate-500',
+const STATUS_STYLES = {
+  new:       { background: 'transparent', color: '#666666', border: '1px solid #333333' },
+  active:    { background: 'rgba(74,158,255,0.08)', color: '#4A9EFF', border: '1px solid rgba(74,158,255,0.2)' },
+  escalated: { background: 'rgba(74,158,255,0.15)', color: '#4A9EFF', border: '1px solid rgba(74,158,255,0.35)' },
+  closed:    { background: 'transparent', color: '#333333', border: '1px solid #222222' },
 };
-
-function formatDate(dt) {
-  if (!dt) return '—';
-  return new Date(dt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: '2-digit' });
-}
 
 export default function LeadList({ selectedLeadId, onSelectLead }) {
   const navigate = useNavigate();
   const [leads, setLeads] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [filter, setFilter] = useState('all'); // all | hot | warm | cold | escalated
+  const [filter, setFilter] = useState('all');
   const [search, setSearch] = useState('');
-  const [editing, setEditing] = useState(null); // lead being edited inline
 
   const fetchLeads = useCallback(() => {
     setLoading(true);
@@ -70,11 +64,11 @@ export default function LeadList({ selectedLeadId, onSelectLead }) {
   }
 
   const FILTERS = [
-    { key: 'all',       label: 'All Leads' },
-    { key: 'hot',       label: '🔥 Hot' },
-    { key: 'warm',      label: '🌡️ Warm' },
-    { key: 'cold',      label: '❄️ Cold' },
-    { key: 'escalated', label: '🚨 Escalated' },
+    { key: 'all',       label: 'All' },
+    { key: 'hot',       label: 'Hot' },
+    { key: 'warm',      label: 'Warm' },
+    { key: 'cold',      label: 'Cold' },
+    { key: 'escalated', label: 'Escalated' },
   ];
 
   return (
@@ -82,25 +76,30 @@ export default function LeadList({ selectedLeadId, onSelectLead }) {
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="font-serif text-2xl font-bold text-navy-900">Leads</h1>
-          <p className="text-slate-500 text-sm mt-0.5">{leads.length} total leads</p>
+          <h1 className="text-xl font-semibold text-white tracking-tight">Leads</h1>
+          <p className="text-xs mt-0.5" style={{ color: '#444444' }}>{leads.length} total</p>
         </div>
       </div>
 
       {/* Filters + Search */}
       <div className="flex flex-col sm:flex-row gap-3 mb-4">
-        <div className="flex gap-1 bg-white border border-slate-200 rounded-lg p-1 shadow-sm">
+        <div
+          className="flex gap-0"
+          style={{ border: '1px solid #222222', background: '#111111' }}
+        >
           {FILTERS.map(({ key, label }) => (
             <button
               key={key}
               onClick={() => setFilter(key)}
-              className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
-                filter === key
-                  ? 'bg-navy-800 text-white shadow-sm'
-                  : 'text-slate-600 hover:bg-slate-100'
-              }`}
+              className="px-3 py-1.5 text-xs font-medium transition-colors"
+              style={{
+                background: filter === key ? '#4A9EFF' : 'transparent',
+                color: filter === key ? '#000000' : '#666666',
+                borderRight: '1px solid #222222',
+                letterSpacing: '0.05em',
+              }}
             >
-              {label}
+              {label.toUpperCase()}
             </button>
           ))}
         </div>
@@ -109,104 +108,108 @@ export default function LeadList({ selectedLeadId, onSelectLead }) {
           placeholder="Search by name, email, area..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="flex-1 px-4 py-2 border border-slate-200 rounded-lg text-sm bg-white shadow-sm focus:outline-none focus:ring-2 focus:ring-navy-300"
+          className="input flex-1"
         />
       </div>
 
-      {/* Leads table */}
+      {/* Table */}
       {loading ? (
         <div className="flex justify-center py-16">
-          <div className="w-7 h-7 border-2 border-navy-800 border-t-transparent rounded-full animate-spin" />
+          <div
+            className="w-5 h-5 border-2 animate-spin"
+            style={{ borderColor: '#4A9EFF', borderTopColor: 'transparent' }}
+          />
         </div>
       ) : (
         <div className="card overflow-hidden">
           {filteredLeads.length === 0 ? (
-            <div className="text-center py-16 text-slate-400">
-              <p className="text-4xl mb-2">👥</p>
-              <p className="font-medium">No leads found</p>
-              <p className="text-sm mt-1">Try adjusting the filters or search</p>
+            <div className="text-center py-16">
+              <p className="font-medium text-white">No leads found</p>
+              <p className="text-xs mt-1" style={{ color: '#444444' }}>
+                Try adjusting the filters or search
+              </p>
             </div>
           ) : (
             <table className="w-full text-sm">
-              <thead className="bg-slate-50 border-b border-slate-200">
+              <thead style={{ background: '#111111', borderBottom: '1px solid #222222' }}>
                 <tr>
-                  {['Lead', 'Intent', 'Budget', 'Area', 'Timeline', 'Urgency', 'Status', 'Actions'].map((h) => (
-                    <th key={h} className="text-left px-4 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wide">
+                  {['Lead', 'Intent', 'Budget', 'Area', 'Timeline', 'Urgency', 'Status', ''].map((h) => (
+                    <th key={h} className="text-left px-4 py-3 label">
                       {h}
                     </th>
                   ))}
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100">
-                {filteredLeads.map((lead) => {
+              <tbody>
+                {filteredLeads.map((lead, i) => {
                   const urgencyCfg = URGENCY_CONFIG[lead.urgency] || URGENCY_CONFIG.cold;
                   const intentCfg  = INTENT_MAP[lead.intent] || INTENT_MAP.unknown;
+                  const isSelected = lead.id === selectedLeadId;
                   return (
                     <tr
                       key={lead.id}
-                      className={`hover:bg-slate-50 transition-colors ${lead.id === selectedLeadId ? 'bg-gold-50' : ''}`}
+                      style={{
+                        borderBottom: i < filteredLeads.length - 1 ? '1px solid #1a1a1a' : 'none',
+                        background: isSelected ? 'rgba(74,158,255,0.05)' : 'transparent',
+                        borderLeft: isSelected ? '2px solid #4A9EFF' : '2px solid transparent',
+                      }}
                     >
-                      {/* Lead name + contact */}
                       <td className="px-4 py-3">
-                        <div className="flex items-center gap-2.5">
+                        <div className="flex items-center gap-2">
                           {lead.escalation_ready === 1 && (
-                            <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse shrink-0" title="Escalation ready" />
+                            <span
+                              className="w-1.5 h-1.5 rounded-full animate-pulse shrink-0"
+                              style={{ background: '#4A9EFF' }}
+                            />
                           )}
                           <div>
-                            <p className="font-semibold text-navy-900">{lead.name}</p>
-                            <p className="text-xs text-slate-400 mt-0.5">
+                            <p className="font-medium text-white">{lead.name}</p>
+                            <p className="text-xs mt-0.5" style={{ color: '#444444' }}>
                               {lead.phone || lead.email || 'No contact'}
                             </p>
                           </div>
                         </div>
                       </td>
-
-                      {/* Intent */}
                       <td className="px-4 py-3">
                         <span className={intentCfg.cls}>{intentCfg.label}</span>
                       </td>
-
-                      {/* Budget */}
-                      <td className="px-4 py-3 text-slate-600">{lead.budget || '—'}</td>
-
-                      {/* Area */}
-                      <td className="px-4 py-3 text-slate-600 max-w-[140px] truncate">{lead.area || '—'}</td>
-
-                      {/* Timeline */}
-                      <td className="px-4 py-3 text-slate-600">{lead.timeline || '—'}</td>
-
-                      {/* Urgency */}
-                      <td className="px-4 py-3">
-                        <span className={urgencyCfg.badge}>
-                          {urgencyCfg.icon} {urgencyCfg.label}
-                        </span>
+                      <td className="px-4 py-3 text-sm" style={{ color: '#888888' }}>
+                        {lead.budget || '—'}
                       </td>
-
-                      {/* Status */}
+                      <td className="px-4 py-3 text-sm max-w-[140px] truncate" style={{ color: '#888888' }}>
+                        {lead.area || '—'}
+                      </td>
+                      <td className="px-4 py-3 text-sm" style={{ color: '#888888' }}>
+                        {lead.timeline || '—'}
+                      </td>
+                      <td className="px-4 py-3">
+                        <span className={urgencyCfg.badge}>{urgencyCfg.label.toUpperCase()}</span>
+                      </td>
                       <td className="px-4 py-3">
                         <select
                           value={lead.status}
                           onChange={(e) => handleStatusChange(lead, e.target.value)}
-                          className={`text-xs font-medium px-2 py-1 rounded-full border-0 cursor-pointer ${STATUS_COLORS[lead.status] || STATUS_COLORS.active}`}
+                          className="text-xs font-medium px-2 py-1 cursor-pointer"
+                          style={{
+                            ...(STATUS_STYLES[lead.status] || STATUS_STYLES.active),
+                            background: (STATUS_STYLES[lead.status] || STATUS_STYLES.active).background,
+                            outline: 'none',
+                          }}
                         >
                           {['new', 'active', 'escalated', 'closed'].map((s) => (
-                            <option key={s} value={s} className="bg-white text-slate-800">
+                            <option key={s} value={s} style={{ background: '#161616', color: '#ffffff' }}>
                               {s.charAt(0).toUpperCase() + s.slice(1)}
                             </option>
                           ))}
                         </select>
                       </td>
-
-                      {/* Actions */}
                       <td className="px-4 py-3">
-                        <div className="flex items-center gap-1">
-                          <button
-                            onClick={() => handleViewConvo(lead.id)}
-                            className="px-2 py-1 text-xs rounded bg-navy-100 hover:bg-navy-200 text-navy-700 font-medium transition-colors"
-                          >
-                            Chat
-                          </button>
-                        </div>
+                        <button
+                          onClick={() => handleViewConvo(lead.id)}
+                          className="btn-ghost text-xs py-1 px-2"
+                        >
+                          Chat
+                        </button>
                       </td>
                     </tr>
                   );
