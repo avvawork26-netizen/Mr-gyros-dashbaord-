@@ -3,94 +3,71 @@
 @tailwind utilities;
 
 @layer base {
-  * { border-radius: 0 !important; }
+  *, *::before, *::after { border-radius: 0 !important; box-sizing: border-box; }
 
   body {
-    background: #0a0a0a;
-    color: #ffffff;
+    background: #080808;
+    color: #d8d8d8;
     font-family: 'Inter', system-ui, sans-serif;
+    font-weight: 400;
     -webkit-font-smoothing: antialiased;
   }
 
-  ::-webkit-scrollbar { width: 4px; height: 4px; }
+  ::-webkit-scrollbar { width: 3px; height: 3px; }
   ::-webkit-scrollbar-track { background: transparent; }
-  ::-webkit-scrollbar-thumb { background: #222222; }
-  ::-webkit-scrollbar-thumb:hover { background: #333333; }
-
-  ::selection { background: rgba(74, 158, 255, 0.2); }
+  ::-webkit-scrollbar-thumb { background: #1e1e1e; }
+  ::selection { background: rgba(74,158,255,0.15); }
 }
 
 @layer components {
-  /* ── Cards ── */
   .card {
-    background: #161616;
-    border: 1px solid #222222;
-    border-radius: 0 !important;
+    background: #111111;
+    border: 1px solid #1e1e1e;
   }
-  .card:hover { border-color: #2a2a2a; }
 
-  /* ── Urgency badges ── */
-  .badge-hot  { @apply inline-flex items-center gap-1 px-2 py-0.5 text-xs font-medium tracking-wide uppercase; background: rgba(74,158,255,0.1); color: #4A9EFF; border: 1px solid rgba(74,158,255,0.25); }
-  .badge-warm { @apply inline-flex items-center gap-1 px-2 py-0.5 text-xs font-medium tracking-wide uppercase; background: rgba(255,255,255,0.05); color: #888888; border: 1px solid #2a2a2a; }
-  .badge-cold { @apply inline-flex items-center gap-1 px-2 py-0.5 text-xs font-medium tracking-wide uppercase; background: transparent; color: #444444; border: 1px solid #222222; }
+  .badge-hot  { @apply inline-flex items-center px-2 py-0.5 text-xs font-medium uppercase tracking-wide; background: #0c1d33; color: #4A9EFF; border: 1px solid #172d4d; }
+  .badge-warm { @apply inline-flex items-center px-2 py-0.5 text-xs font-medium uppercase tracking-wide; background: #161616; color: #505050; border: 1px solid #222222; }
+  .badge-cold { @apply inline-flex items-center px-2 py-0.5 text-xs font-medium uppercase tracking-wide; background: transparent; color: #333333; border: 1px solid #1e1e1e; }
 
-  /* ── Intent badges ── */
-  .badge-buy     { @apply inline-flex items-center px-2 py-0.5 text-xs font-medium tracking-wide uppercase; background: transparent; color: #4A9EFF; border: 1px solid rgba(74,158,255,0.3); }
-  .badge-sell    { @apply inline-flex items-center px-2 py-0.5 text-xs font-medium tracking-wide uppercase; background: transparent; color: #888; border: 1px solid #333; }
-  .badge-rent    { @apply inline-flex items-center px-2 py-0.5 text-xs font-medium tracking-wide uppercase; background: transparent; color: #888; border: 1px solid #333; }
-  .badge-invest  { @apply inline-flex items-center px-2 py-0.5 text-xs font-medium tracking-wide uppercase; background: transparent; color: #888; border: 1px solid #333; }
-  .badge-unknown { @apply inline-flex items-center px-2 py-0.5 text-xs font-medium tracking-wide uppercase; background: transparent; color: #444; border: 1px solid #222; }
+  .badge-buy     { @apply inline-flex items-center px-2 py-0.5 text-xs font-medium uppercase tracking-wide; background: #0c1d33; color: #4A9EFF; border: 1px solid #172d4d; }
+  .badge-sell    { @apply inline-flex items-center px-2 py-0.5 text-xs font-medium uppercase tracking-wide; background: transparent; color: #484848; border: 1px solid #1e1e1e; }
+  .badge-rent    { @apply inline-flex items-center px-2 py-0.5 text-xs font-medium uppercase tracking-wide; background: transparent; color: #484848; border: 1px solid #1e1e1e; }
+  .badge-invest  { @apply inline-flex items-center px-2 py-0.5 text-xs font-medium uppercase tracking-wide; background: transparent; color: #484848; border: 1px solid #1e1e1e; }
+  .badge-unknown { @apply inline-flex items-center px-2 py-0.5 text-xs font-medium uppercase tracking-wide; background: transparent; color: #303030; border: 1px solid #1a1a1a; }
 
-  /* ── Buttons ── */
   .btn-primary {
-    @apply px-4 py-2 text-sm font-medium transition-all;
-    background: #4A9EFF;
-    color: #000;
-    border: none;
+    @apply px-4 py-2 text-xs font-medium transition-colors uppercase tracking-wider;
+    background: #4A9EFF; color: #000; border: none;
   }
   .btn-primary:hover { background: #6ab2ff; }
 
   .btn-ghost {
-    @apply px-4 py-2 text-sm font-medium transition-all;
-    background: transparent;
-    color: #888;
-    border: 1px solid #222;
+    @apply px-3 py-1.5 text-xs font-medium transition-colors;
+    background: transparent; color: #484848; border: 1px solid #1e1e1e;
   }
-  .btn-ghost:hover { border-color: #444; color: #fff; }
+  .btn-ghost:hover { border-color: #2e2e2e; color: #d8d8d8; }
 
   .btn-dim {
-    @apply px-4 py-2 text-sm font-medium transition-all;
-    background: #1c2d42;
-    color: #4A9EFF;
-    border: 1px solid rgba(74,158,255,0.2);
+    @apply px-4 py-2 text-xs font-medium transition-colors uppercase tracking-wider;
+    background: #0c1d33; color: #4A9EFF; border: 1px solid #172d4d;
   }
-  .btn-dim:hover { background: #243549; }
+  .btn-dim:hover { background: #0f2540; }
 
-  /* ── Section label ── */
-  .label {
-    @apply text-xs font-medium tracking-widest uppercase;
-    color: #444444;
-  }
+  .label { @apply font-medium tracking-widest uppercase; color: #404040; font-size: 9px; }
 
-  /* ── Chat bubbles ── */
-  .bubble-user      { background: #4A9EFF; color: #000; padding: 10px 14px; max-width: 22rem; font-size: 0.875rem; line-height: 1.5; }
-  .bubble-assistant { background: #161616; color: #fff; border: 1px solid #222; padding: 10px 14px; max-width: 22rem; font-size: 0.875rem; line-height: 1.5; }
+  .bubble-user      { background: #4A9EFF; color: #000; padding: 9px 13px; max-width: 22rem; font-size: 0.8125rem; line-height: 1.55; }
+  .bubble-assistant { background: #111111; color: #d8d8d8; border: 1px solid #1e1e1e; padding: 9px 13px; max-width: 22rem; font-size: 0.8125rem; line-height: 1.55; }
 
-  /* ── Input ── */
   .input {
-    @apply w-full px-3 py-2 text-sm transition-all;
-    background: #111111;
-    color: #fff;
-    border: 1px solid #222222;
-    outline: none;
+    @apply w-full px-3 py-2 text-sm transition-colors;
+    background: #0d0d0d; color: #d8d8d8; border: 1px solid #1e1e1e; outline: none;
   }
   .input:focus { border-color: #4A9EFF; }
-  .input::placeholder { color: #444; }
+  .input::placeholder { color: #303030; }
 }
 
-/* ── Escalation pulse ── */
 @keyframes esc-pulse {
-  0%, 100% { border-color: rgba(74,158,255,0.3); }
-  50%       { border-color: rgba(74,158,255,0.8); }
+  0%, 100% { border-color: rgba(74,158,255,0.25); }
+  50%       { border-color: rgba(74,158,255,0.7); }
 }
 .esc-pulse { animation: esc-pulse 2s ease-in-out infinite; }

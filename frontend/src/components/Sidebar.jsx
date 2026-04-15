@@ -9,95 +9,69 @@ const NAV = [
   { to: '/followups',     label: 'Follow-ups' },
 ];
 
-function DiamondIcon() {
-  return (
-    <svg width="22" height="22" viewBox="0 0 22 22" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <polygon points="11,2 18,11 11,20 4,11" fill="none" stroke="#4A9EFF" strokeWidth="1.5" />
-      <polygon points="11,6 16,11 11,16 6,11" fill="#4A9EFF" opacity="0.25" />
-      <polygon points="11,6 16,11 11,16 6,11" fill="none" stroke="#4A9EFF" strokeWidth="1" />
-    </svg>
-  );
-}
-
 export default function Sidebar() {
   return (
-    <aside
-      className="w-56 flex-shrink-0 flex flex-col"
-      style={{ background: '#111111', borderRight: '1px solid #222222' }}
-    >
+    <aside className="w-52 flex-shrink-0 flex flex-col" style={{ background: '#0d0d0d', borderRight: '1px solid #1e1e1e' }}>
       {/* Logo */}
-      <div className="px-5 pt-7 pb-6" style={{ borderBottom: '1px solid #222222' }}>
-        <div className="flex items-center gap-2.5">
-          <DiamondIcon />
-          <div>
-            <div
-              className="text-white font-bold tracking-[0.2em] text-base leading-none"
-              style={{ letterSpacing: '0.25em' }}
-            >
-              AVA
-            </div>
-            <div className="text-xs mt-0.5" style={{ color: '#444444', letterSpacing: '0.08em' }}>
-              AI REALTOR
-            </div>
-          </div>
+      <div className="px-5 pt-7 pb-5" style={{ borderBottom: '1px solid #1e1e1e' }}>
+        <div style={{ fontSize: 17, fontWeight: 300, letterSpacing: '0.3em', color: '#ffffff', textTransform: 'uppercase' }}>
+          Ava
         </div>
-        <div
-          className="mt-4 px-3 py-2 text-xs"
-          style={{ background: '#161616', border: '1px solid #222222', color: '#666666' }}
-        >
-          <span style={{ color: '#4A9EFF' }}>AYOUB</span>
-          {' · '}Orlando &amp; Florida Coast
+        <div style={{ fontSize: 9.5, fontWeight: 400, letterSpacing: '0.12em', color: '#404040', textTransform: 'uppercase', marginTop: 4 }}>
+          AI Realtor Assistant
         </div>
       </div>
 
-      {/* Nav links */}
-      <nav className="flex-1 py-4">
+      {/* Nav */}
+      <nav className="flex-1 py-3">
         {NAV.map(({ to, label }) => (
           <NavLink
             key={to}
             to={to}
             end={to === '/'}
-            className={({ isActive }) =>
-              `flex items-center px-5 py-2.5 text-sm font-medium transition-colors ${
-                isActive
-                  ? 'border-l-2 text-white'
-                  : 'border-l-2 border-transparent hover:text-white'
-              }`
-            }
             style={({ isActive }) => ({
-              borderLeftColor: isActive ? '#4A9EFF' : 'transparent',
-              color: isActive ? '#ffffff' : '#666666',
-              background: isActive ? 'rgba(74,158,255,0.06)' : 'transparent',
+              display: 'flex',
+              alignItems: 'center',
+              padding: '8px 20px',
+              fontSize: 12,
+              fontWeight: isActive ? 500 : 400,
+              letterSpacing: '0.03em',
+              color: isActive ? '#f0f0f0' : '#484848',
+              background: isActive ? '#141414' : 'transparent',
+              borderLeft: isActive ? '2px solid #4A9EFF' : '2px solid transparent',
+              textDecoration: 'none',
+              transition: 'color 0.15s, background 0.15s',
             })}
+            onMouseEnter={(e) => { if (!e.currentTarget.dataset.active) e.currentTarget.style.color = '#888888'; }}
+            onMouseLeave={(e) => { /* handled by NavLink style fn */ }}
           >
             {label}
           </NavLink>
         ))}
       </nav>
 
-      {/* Chat widget link */}
-      <div className="px-4 pb-6">
+      {/* Bottom */}
+      <div className="px-4 pb-5" style={{ borderTop: '1px solid #1e1e1e', paddingTop: 14 }}>
         <a
           href="/chat"
           target="_blank"
           rel="noreferrer"
-          className="flex items-center justify-center w-full py-2 text-xs font-medium transition-colors"
           style={{
-            border: '1px solid #222222',
-            color: '#666666',
-            letterSpacing: '0.08em',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            width: '100%', padding: '7px 0', fontSize: 10, fontWeight: 400,
+            letterSpacing: '0.1em', color: '#585858', textTransform: 'uppercase',
+            textDecoration: 'none', border: '1px solid #242424', background: 'transparent',
+            transition: 'color 0.15s, border-color 0.15s',
           }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.borderColor = '#444444';
-            e.currentTarget.style.color = '#ffffff';
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.borderColor = '#222222';
-            e.currentTarget.style.color = '#666666';
-          }}
+          onMouseEnter={(e) => { e.currentTarget.style.color = '#888888'; e.currentTarget.style.borderColor = '#333333'; }}
+          onMouseLeave={(e) => { e.currentTarget.style.color = '#585858'; e.currentTarget.style.borderColor = '#242424'; }}
         >
-          OPEN CHAT WIDGET
+          Open Chat Widget
         </a>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 7, marginTop: 10 }}>
+          <span style={{ width: 5, height: 5, borderRadius: '50%', background: '#4A9EFF', flexShrink: 0 }} />
+          <span style={{ fontSize: 10, color: '#404040', letterSpacing: '0.04em' }}>Ava online</span>
+        </div>
       </div>
     </aside>
   );
